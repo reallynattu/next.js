@@ -269,6 +269,13 @@ export function getSegmentVaryPathForRequest(
   // params that can be treated as Fallback. (Or perhaps the inverse.)
   const originalVaryPath = tree.varyPath
 
+  if (fetchStrategy === FetchStrategy.RuntimeShell) {
+    // The Shell phase issues a runtime render with params omitted. The
+    // resulting entry is reusable across all concrete param values, so we
+    // key it at the shell vary path (every param substituted with Fallback).
+    return getShellSegmentVaryPath(originalVaryPath)
+  }
+
   // Only page segments (and the special "metadata" segment, which is treated
   // like a page segment for the purposes of caching) may contain search
   // params. There's no reason to include them in the vary path otherwise.
@@ -359,6 +366,37 @@ export function getFulfilledSegmentVaryPath(
       original.parent === null
         ? null
         : getFulfilledSegmentVaryPath(original.parent, varyParams),
+  }
+  return clone as SegmentVaryPath
+}
+
+function getShellSegmentVaryPath(original: VaryPath): SegmentVaryPath {
+  // Re-keys a segment's vary path to identify the "App Shell" entry for this
+  // segment position — a reusable, param-free loading state that can be served
+  // for any concrete navigation to this segment. Every param node (path
+  // params, search params) is replaced with Fallback; only structural nodes
+  // (request keys, etc.) keep their concrete value.
+  //
+  // NOTE: In the future we may allow root params to be accessed in the shell,
+  // since they change less frequently, and if they do change during a
+  // navigation, we perform an MPA navigation. So they don't affect SPA
+  // navigations. However, because in the future we plan to use the App Shell
+  // concept to optimize _MPA_ navigations, too (by disk caching the HTML
+  // representation of the App Shell), our treatment of root params is not a
+  // settled matter. For now, we treat them the same as non-root params and
+  // forbid them from the shell.
+  //
+  // One potential way we could model root params in the future is to evict the
+  // entire client cache whenever a root param change is detected. Then we would
+  // no longer need to include them in the cache key. This would be consistent
+  // with how we treat session based data, like cookies.
+  const clone: VaryPath = {
+    id: original.id,
+    value: original.id === null ? original.value : Fallback,
+    parent:
+      original.parent === null
+        ? null
+        : getShellSegmentVaryPath(original.parent),
   }
   return clone as SegmentVaryPath
 }
