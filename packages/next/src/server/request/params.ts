@@ -343,9 +343,20 @@ export function createPrerenderParamsForClientSegment(
         throw new InvariantError(
           'createPrerenderParamsForClientSegment should not be called inside generateStaticParams.'
         )
+      case 'prerender-runtime':
+        if (workUnitStore.forceOmitParams) {
+          // App Shell prefetch: hang on params so the client segment doesn't
+          // receive a resolved value and render. Matches the server-side
+          // behavior in createRuntimePrerenderParams.
+          return makeHangingPromise(
+            workUnitStore.renderSignal,
+            workStore.route,
+            '`params`'
+          )
+        }
+        break
       case 'prerender-ppr':
       case 'prerender-legacy':
-      case 'prerender-runtime':
       case 'request':
         break
       default:
@@ -427,6 +438,17 @@ function createRuntimePrerenderParams(
   varyParamsAccumulator: VaryParamsAccumulator | null,
   isRuntimePrefetchable: boolean
 ): Promise<Params> {
+  if (workUnitStore.forceOmitParams) {
+    // App Shell prefetch: any `await params` suspends. Segments that depend
+    // on params render as holes, leaving the param-independent shell.
+    const workStore = workAsyncStorage.getStore()
+    return makeHangingPromise<Params>(
+      workUnitStore.renderSignal,
+      workStore?.route ?? '',
+      '`params`'
+    )
+  }
+
   const underlyingParamsWithVarying =
     varyParamsAccumulator !== null
       ? createVaryingParams(

@@ -245,6 +245,19 @@ function createRuntimePrerenderSearchParams(
   varyParamsAccumulator: VaryParamsAccumulator | null,
   isRuntimePrefetchable: boolean
 ): Promise<SearchParams> {
+  if (workUnitStore.forceOmitParams) {
+    // App Shell prefetch: any `await searchParams` suspends. Segments that
+    // depend on search params render as holes, leaving the
+    // search-param-independent shell. Matches the behavior in
+    // createRuntimePrerenderParams for path params.
+    const workStore = workAsyncStorage.getStore()
+    return makeHangingPromise<SearchParams>(
+      workUnitStore.renderSignal,
+      workStore?.route ?? '',
+      '`searchParams`'
+    )
+  }
+
   const underlyingSearchParamsWithVarying =
     varyParamsAccumulator !== null
       ? createVaryingSearchParams(varyParamsAccumulator, underlyingSearchParams)
