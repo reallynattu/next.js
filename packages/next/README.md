@@ -1,9 +1,9 @@
 <div align="center">
   <a href="https://nextjs.org">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://lottie.host/28a0f126-35ea-46a2-a7d5-476b8ecb4ce1/fsKtcxxLtO.svg">
-      <source media="(prefers-color-scheme: light)" srcset="https://lottie.host/82d6c54a-496d-4ebb-88e5-8dfc751fa9d9/Ao33Pt5Evj.svg">
-      <img alt="Next.js logo" src="https://lottie.host/82d6c54a-496d-4ebb-88e5-8dfc751fa9d9/Ao33Pt5Evj.svg" width="550">
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/reallynattu/next.js/animated-svg-logo-readme/.github/assets/nextjs-logo-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/reallynattu/next.js/animated-svg-logo-readme/.github/assets/nextjs-logo-light.svg">
+      <img alt="Next.js logo" src="https://raw.githubusercontent.com/reallynattu/next.js/animated-svg-logo-readme/.github/assets/nextjs-logo-light.svg" width="550">
     </picture>
   </a>
   <h1>Next.js</h1>
